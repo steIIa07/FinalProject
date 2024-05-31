@@ -1,33 +1,26 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : Character
 {
-    private static int _hitAnimationHash;
-    private static int _walkAnimationHash;
-    private static int _attackAnimationHash;
-    private static int _deathAnimationHash;
+    private static int _hitAnimationHash = Animator.StringToHash("Hit");
+    private static int _walkAnimationHash = Animator.StringToHash("Walk");
+    private static int _attackAnimationHash = Animator.StringToHash("Attack");
+    private static int _deathAnimationHash = Animator.StringToHash("Death");
     private Animator _animator;
     private Transform _player;
     private bool _isAttacking = false;
     private bool _isWalking = false;
-    [SerializeField, Range(0f, 1000f)] private int _health = 100;  
-    [SerializeField, Range(0f, 100f)] private int _damage = 10;
-    [SerializeField] private float _speed = 0.01f;
+    private bool _isDead = false;
+    [SerializeField] private int _damage = 10;
     [SerializeField] private float _RotationSpeed = 0.03f;
     [SerializeField] private float _attackRange = 2f;
     [SerializeField] private float _awareRange = 10f;
-    
 
     // Start is called before the first frame update
     void Start()
     {
-        _hitAnimationHash = Animator.StringToHash("Hit");
-        _walkAnimationHash = Animator.StringToHash("Walk");
-        _attackAnimationHash = Animator.StringToHash("Attack");
-        _deathAnimationHash = Animator.StringToHash("Death");
         _animator = GetComponent<Animator>();
         _player = GameObject.FindGameObjectWithTag("Player").transform;
     }
@@ -35,6 +28,9 @@ public class Enemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(_isDead) return;
+
+        // プレイヤーとの距離を計算 / Calculate the distance between the player
         var distance = (transform.position-_player.position).sqrMagnitude;
         
         // 攻撃範囲内 / In attack range
@@ -54,19 +50,26 @@ public class Enemy : MonoBehaviour
         }
 
         // プレイヤーの方向を向く＆プレイヤーに向かって進む / Look at the player and move towards the player
-        if(_isWalking && !_isAttacking) {
-            var direction = _player.position - transform.position;
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), _RotationSpeed * Time.deltaTime);
-            transform.Translate(0, 0, _speed * Time.deltaTime);
-            // 歩くアニメーション / Walking animation
+        if(_isWalking && !_isAttacking) MoveTowardsPlayer();
+    }
+
+    private void MoveTowardsPlayer()
+    {
+        var direction = _player.position - transform.position;
+        transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), _RotationSpeed * Time.deltaTime);
+        transform.Translate(0, 0, _speed * Time.deltaTime);
+    }
+    private void OnTriggerEnter(Collider other) {
+        if (other.gameObject.tag == "Weapon") {
+            TakeDamage(Randomize(_damage));
+            if(_health == 0) Die();
         }
     }
 
-    private void OnTriggerEnter(Collider other) {
-        // プレイヤーの攻撃を受けた / Hit by the player's attack
-        if (other.gameObject.tag == "Weapon") {
-            Debug.Log("Hit");
-            // ダメージを受ける / Take damage
-        }
+    public override void Die()
+    {
+        _isDead = true;
+        // _animator.SetTrigger(_deathAnimationHash);
+        Destroy(gameObject, 3.0f);
     }
 }
