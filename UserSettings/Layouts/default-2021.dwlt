@@ -641,9 +641,9 @@ MonoBehaviour:
       floating: 0
       collapsed: 0
       displayed: 0
-      snapOffset: {x: 0, y: 0}
-      snapOffsetDelta: {x: 0, y: 0}
-      snapCorner: 0
+      snapOffset: {x: 0, y: -643.19995}
+      snapOffsetDelta: {x: 0, y: 208.79996}
+      snapCorner: 2
       id: Scene View/Camera
       index: 1
       layout: 4
