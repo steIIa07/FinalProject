@@ -10,17 +10,16 @@ abstract public class Character : MonoBehaviour
     [SerializeField] protected int _maxHealth = 100;
     public int MaxHealth { get { return _maxHealth; } set { _maxHealth = value; } }
     [SerializeField] protected float _speed = 0.01f;
-    
-    protected void Awake() {
-        _health = _maxHealth;
-        Debug.Log(name + ": HP = " + _health);
-    }
+    [SerializeField] protected float _invincibleDuration;
+    [SerializeField] protected AudioSource _hitSound;
+    protected float _invincibleTime = 1.0f;
+    protected bool _invincible = false;
 
     // ダメージを受ける / Take damage
     public void TakeDamage(int damage) {
+        _hitSound.Play();
         _health -= damage;
         _health = Math.Max(0, _health);
-        transform.position = Vector3.Lerp(transform.position, transform.position - transform.forward, 1f);
     }
 
     // 死亡 / Death
